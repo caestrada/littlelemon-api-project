@@ -23,6 +23,11 @@ pipenv shell
 django-admin startproject LittleLemon .
 ```
 
+5. Create app for project
+```
+python manage.py startapp LittleLemonAPI
+```
+
 ## >_ Commands
 
 Start virtual environment
