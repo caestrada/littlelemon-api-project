@@ -4,8 +4,8 @@
 
 1. Create project directory
 ```
-mkdir LittleLemmon
-cd LittleLemmon
+mkdir LittleLemon
+cd LittleLemon
 ```
 
 2. Setup Django
