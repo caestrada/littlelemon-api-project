@@ -23,7 +23,7 @@ pipenv shell
 django-admin startproject LittleLemon .
 ```
 
-5. Create app for project
+5. Create app for project. This will create the app with all the necessary migration and configurations.
 ```
 python manage.py startapp LittleLemonAPI
 ```
@@ -43,4 +43,13 @@ django-admin startproject <project_name> .
 Create app for project
 ```
 python manage.py startapp <app_name>
+```
+
+Run server
+```
+python manage.py runserver
+
+# On different port
+
+python manage.py runserver <port_number>
 ```
