@@ -28,6 +28,11 @@ django-admin startproject LittleLemon .
 python manage.py startapp LittleLemonAPI
 ```
 
+6. Install DRF
+```
+pipenv install djangorestframework
+```
+
 ## >_ Commands
 
 Start virtual environment
