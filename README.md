@@ -18,6 +18,11 @@ pipenv install django
 pipenv shell
 ```
 
+4. Create project
+```
+django-admin startproject LittleLemon .
+```
+
 ## >_ Commands
 
 Start virtual environment
