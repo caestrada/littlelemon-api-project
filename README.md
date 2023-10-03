@@ -34,3 +34,13 @@ Start virtual environment
 ```
 pipenv shell
 ```
+
+Create a project
+```
+django-admin startproject <project_name> .
+```
+
+Create app for project
+```
+python manage.py startapp <app_name>
+```
