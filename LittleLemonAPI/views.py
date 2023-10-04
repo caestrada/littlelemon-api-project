@@ -1,12 +1,17 @@
-from django.shortcuts import render
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework import status, generics
 from rest_framework.views import APIView
 
-@api_view(['GET', 'POST'])
-def menu_items(request):
-    return Response('List of menu items', status=status.HTTP_200_OK)
+from .models import MenuItem
+from .serializers import MenuItemSerializer
+
+class MenuItemsView(generics.ListCreateAPIView):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemSerializer
+
+class SingleMenuItemView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemSerializer
 
 class OrderList(APIView):
     def get(self, request):
