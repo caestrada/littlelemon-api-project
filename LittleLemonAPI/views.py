@@ -41,3 +41,11 @@ class OrderDetail(APIView):
 @permission_classes([IsAuthenticated])
 def secret(request):
     return Response({"message": "This is a secret message!"})
+
+@api_view()
+@permission_classes([IsAuthenticated])
+def manager_view(request):
+    if request.user.groups.filter(name='Manager').exists() or request.user.is_superuser:
+        return Response({"message": "Only Managers could see this!"})
+    else:
+        return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
