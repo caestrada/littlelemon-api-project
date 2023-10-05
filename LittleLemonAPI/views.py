@@ -2,8 +2,11 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import permission_classes
+from django.contrib.auth.models import User, Group
+from django.shortcuts import get_object_or_404
+
 
 from .models import Category, MenuItem
 from .serializers import CategorySerializer, MenuItemSerializer
@@ -49,3 +52,15 @@ def manager_view(request):
         return Response({"message": "Only Managers could see this!"})
     else:
         return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
+    
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def managers(request):
+    username = request.data.get('username')
+    if username:
+        user = get_object_or_404(User, username=username)
+        managers = Group.objects.get(name='Manager')
+        managers.user_set.add(user)
+        return Response({"message": "ok"})
+    
+    return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
