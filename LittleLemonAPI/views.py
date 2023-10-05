@@ -53,14 +53,18 @@ def manager_view(request):
     else:
         return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
     
-@api_view(['POST'])
+@api_view(['POST', 'DELETE'])
 @permission_classes([IsAdminUser])
 def managers(request):
     username = request.data.get('username')
     if username:
         user = get_object_or_404(User, username=username)
         managers = Group.objects.get(name='Manager')
-        managers.user_set.add(user)
+
+        if request.method == 'POST':
+            managers.user_set.add(user)
+        elif request.method == 'DELETE':
+            managers.user_set.remove(user)
         return Response({"message": "ok"})
     
     return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
