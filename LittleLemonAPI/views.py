@@ -75,9 +75,6 @@ def manager_view(request):
 class ManagersViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminUser]
 
-    def get(self, request):
-        return Response('Ok', status=status.HTTP_200_OK)
-
     def list(self, request):
         managers = Group.objects.get(name='Manager')
         return Response([user.username for user in managers.user_set.all()], status=status.HTTP_200_OK)
