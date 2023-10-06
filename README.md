@@ -8,7 +8,7 @@
 
 - [x] The admin can add menu items 
 
-- [ ] The admin can add categories
+- [x] The admin can add categories
 
 - [ ] Managers can log in 
 
@@ -26,7 +26,7 @@
 
 - [ ] Customers can log in using their username and password and get access tokens
 
-- [ ] Customers can browse all categories 
+- [x] Customers can browse all categories 
 
 - [x] Customers can browse all the menu items at once
 
