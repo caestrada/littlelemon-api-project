@@ -6,7 +6,7 @@
 
 - [x] You can access the manager group with an admin token
 
-- [ ] The admin can add menu items 
+- [x] The admin can add menu items 
 
 - [ ] The admin can add categories
 
@@ -28,7 +28,7 @@
 
 - [ ] Customers can browse all categories 
 
-- [ ] Customers can browse all the menu items at once
+- [x] Customers can browse all the menu items at once
 
 - [ ] Customers can browse menu items by category
 
