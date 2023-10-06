@@ -11,6 +11,9 @@ from django.shortcuts import get_object_or_404
 from .models import Category, MenuItem
 from .serializers import CategorySerializer, MenuItemSerializer
 
+from rest_framework import viewsets
+
+
 class CategoriesView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -53,18 +56,46 @@ def manager_view(request):
     else:
         return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
     
-@api_view(['POST', 'DELETE'])
-@permission_classes([IsAdminUser])
-def managers(request):
-    username = request.data.get('username')
-    if username:
-        user = get_object_or_404(User, username=username)
-        managers = Group.objects.get(name='Manager')
+# @api_view(['POST', 'DELETE'])
+# @permission_classes([IsAdminUser])
+# def managers(request):
+#     username = request.data.get('username')
+#     if username:
+#         user = get_object_or_404(User, username=username)
+#         managers = Group.objects.get(name='Manager')
 
-        if request.method == 'POST':
-            managers.user_set.add(user)
-        elif request.method == 'DELETE':
-            managers.user_set.remove(user)
-        return Response({"message": "ok"})
+#         if request.method == 'POST':
+#             managers.user_set.add(user)
+#         elif request.method == 'DELETE':
+#             managers.user_set.remove(user)
+#         return Response({"message": "ok"})
     
-    return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
+#     return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
+
+class ManagersViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        return Response('Ok', status=status.HTTP_200_OK)
+
+    def list(self, request):
+        managers = Group.objects.get(name='Manager')
+        return Response([user.username for user in managers.user_set.all()], status=status.HTTP_200_OK)
+
+    def create(self, request):
+        username = request.data.get('username')
+        if username:
+            user = get_object_or_404(User, username=username)
+            managers = Group.objects.get(name='Manager')
+            managers.user_set.add(user)
+            return Response({"message": "User added to managers group"})
+        return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request):
+        username = request.data.get('username')
+        if username:
+            user = get_object_or_404(User, username=username)
+            managers = Group.objects.get(name='Manager')
+            managers.user_set.remove(user)
+            return Response({"message": "User removed from managers group"})
+        return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)

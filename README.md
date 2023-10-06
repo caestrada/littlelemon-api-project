@@ -4,7 +4,7 @@
 
 - [x] The admin can assign users to the manager group
 
-- [ ] You can access the manager group with an admin token
+- [x] You can access the manager group with an admin token
 
 - [ ] The admin can add menu items 
 
