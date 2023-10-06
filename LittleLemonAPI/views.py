@@ -32,6 +32,7 @@ class SingleCategoryView(generics.RetrieveAPIView):
 class MenuItemsView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
+    filterset_fields = ['category__title']
 
     def get_permissions(self):
         permission_classes = []
