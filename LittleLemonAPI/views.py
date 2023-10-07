@@ -104,13 +104,19 @@ def manager_view(request):
 #     return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
 
 class ManagersViewSet(viewsets.ViewSet):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        managers = Group.objects.get(name='Manager')
-        return Response([user.username for user in managers.user_set.all()], status=status.HTTP_200_OK)
+        if request.user.groups.filter(name='Manager').exists() or request.user.is_superuser:
+            managers = Group.objects.get(name='Manager')
+            return Response([user.username for user in managers.user_set.all()], status=status.HTTP_200_OK)
+        
+        return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
 
     def create(self, request):
+        if not request.user.groups.filter(name='Manager').exists() and not request.user.is_superuser:
+            return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
+
         username = request.data.get('username')
         if username:
             user = get_object_or_404(User, username=username)
@@ -118,11 +124,11 @@ class ManagersViewSet(viewsets.ViewSet):
             managers.user_set.add(user)
             return Response({"message": "User added to managers group"})
         return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
-
-    def destroy(self, request):
-        username = request.data.get('username')
-        if username:
-            user = get_object_or_404(User, username=username)
+    
+class SingleManagersView(generics.DestroyAPIView):
+    def destroy(self, request, userId):
+        user = get_object_or_404(User, id=userId)
+        if user:
             managers = Group.objects.get(name='Manager')
             managers.user_set.remove(user)
             return Response({"message": "User removed from managers group"})
