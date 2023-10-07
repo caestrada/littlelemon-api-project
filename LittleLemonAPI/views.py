@@ -45,6 +45,18 @@ class SingleMenuItemView(generics.RetrieveUpdateDestroyAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
 
+    def update(self, request, *args, **kwargs):
+        if request.user.groups.filter(name='Manager').exists() or request.user.is_superuser:
+            return super().update(request, *args, **kwargs)
+        else:
+            return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
+        
+    def destroy(self, request, *args, **kwargs):
+        if request.user.groups.filter(name='Manager').exists() or request.user.is_superuser:
+            return super().destroy(request, *args, **kwargs)
+        else:
+            return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
+
 class OrderList(APIView):
     def get(self, request):
         return Response('List of orders', status=status.HTTP_200_OK)
