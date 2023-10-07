@@ -24,10 +24,14 @@ class CategoriesView(generics.ListCreateAPIView):
             permission_classes = [IsAdminUser]
 
         return [permission() for permission in permission_classes]
+
+
     
 class SingleCategoryView(generics.RetrieveAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
+
+
 
 class MenuItemsView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -40,6 +44,8 @@ class MenuItemsView(generics.ListCreateAPIView):
             return super().create(request, *args, **kwargs)
         else:
             return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
+
+
 
 class SingleMenuItemView(generics.RetrieveUpdateDestroyAPIView):
     queryset = MenuItem.objects.all()
@@ -57,13 +63,17 @@ class SingleMenuItemView(generics.RetrieveUpdateDestroyAPIView):
         else:
             return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
 
+
+
 class OrderList(APIView):
     def get(self, request):
         return Response('List of orders', status=status.HTTP_200_OK)
 
     def post(self, request):
         return Response('Order created', status=status.HTTP_201_CREATED)
-    
+
+
+
 class OrderDetail(APIView):
     def get(self, request, pk):
         return Response('Order detail with id ' + str(pk), status=status.HTTP_200_OK)
@@ -73,11 +83,15 @@ class OrderDetail(APIView):
 
     def delete(self, request, pk):
         return Response('Order deleted', status=status.HTTP_204_NO_CONTENT)
-    
+
+
+
 @api_view()
 @permission_classes([IsAuthenticated])
 def secret(request):
     return Response({"message": "This is a secret message!"})
+
+
 
 @api_view()
 @permission_classes([IsAuthenticated])
@@ -86,22 +100,8 @@ def manager_view(request):
         return Response({"message": "Only Managers could see this!"})
     else:
         return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
-    
-# @api_view(['POST', 'DELETE'])
-# @permission_classes([IsAdminUser])
-# def managers(request):
-#     username = request.data.get('username')
-#     if username:
-#         user = get_object_or_404(User, username=username)
-#         managers = Group.objects.get(name='Manager')
 
-#         if request.method == 'POST':
-#             managers.user_set.add(user)
-#         elif request.method == 'DELETE':
-#             managers.user_set.remove(user)
-#         return Response({"message": "ok"})
-    
-#     return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class GroupsViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -131,7 +131,9 @@ class GroupsViewSet(viewsets.ViewSet):
             managers.user_set.add(user)
             return Response({"message": f"User added to {group} group"})
         return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
+
 class SingleGroupsView(generics.DestroyAPIView):
     def __get_group(self, url_path):
         group = "Manager" if "manager" in url_path else "Delivery crew"
