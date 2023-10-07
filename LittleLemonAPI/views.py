@@ -30,16 +30,16 @@ class SingleCategoryView(generics.RetrieveAPIView):
     serializer_class = MenuItemSerializer
 
 class MenuItemsView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
     filterset_fields = ['category__title']
 
-    def get_permissions(self):
-        permission_classes = []
-        if self.request.method != 'GET':
-            permission_classes = [IsAdminUser]
-
-        return [permission() for permission in permission_classes]
+    def create(self, request, *args, **kwargs):
+        if request.user.groups.filter(name='Manager').exists() or request.user.is_superuser:
+            return super().create(request, *args, **kwargs)
+        else:
+            return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
 
 class SingleMenuItemView(generics.RetrieveUpdateDestroyAPIView):
     queryset = MenuItem.objects.all()
