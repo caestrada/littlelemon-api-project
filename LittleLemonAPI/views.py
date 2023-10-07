@@ -103,33 +103,45 @@ def manager_view(request):
     
 #     return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
 
-class ManagersViewSet(viewsets.ViewSet):
+class GroupsViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
+    def __get_group(self, url_path):
+        group = "Manager" if "manager" in url_path else "Delivery crew"
+        return group
+
     def list(self, request):
+        group = self.__get_group(request.path)
+
         if request.user.groups.filter(name='Manager').exists() or request.user.is_superuser:
-            managers = Group.objects.get(name='Manager')
+            managers = Group.objects.get(name=group)
             return Response([user.username for user in managers.user_set.all()], status=status.HTTP_200_OK)
         
         return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
 
     def create(self, request):
-        if not request.user.groups.filter(name='Manager').exists() and not request.user.is_superuser:
+        group = self.__get_group(request.path)
+        if not request.user.groups.filter(name=group).exists() and not request.user.is_superuser:
             return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
 
         username = request.data.get('username')
         if username:
             user = get_object_or_404(User, username=username)
-            managers = Group.objects.get(name='Manager')
+            managers = Group.objects.get(name=group)
             managers.user_set.add(user)
-            return Response({"message": "User added to managers group"})
+            return Response({"message": f"User added to {group} group"})
         return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
     
-class SingleManagersView(generics.DestroyAPIView):
+class SingleGroupsView(generics.DestroyAPIView):
+    def __get_group(self, url_path):
+        group = "Manager" if "manager" in url_path else "Delivery crew"
+        return group
+
     def destroy(self, request, userId):
+        group = self.__get_group(request.path)
         user = get_object_or_404(User, id=userId)
         if user:
-            managers = Group.objects.get(name='Manager')
+            managers = Group.objects.get(name=group)
             managers.user_set.remove(user)
-            return Response({"message": "User removed from managers group"})
+            return Response({"message": f"User removed from {group} group"})
         return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)

@@ -13,6 +13,8 @@ urlpatterns = [
     path('api-token-auth', obtain_auth_token),
     path('manager-view', views.manager_view),
     # path('groups/manager/users', views.managers),
-    path('groups/manager/users', views.ManagersViewSet.as_view( {'get': 'list', 'post': 'create'})),
-    path('groups/manager/users/<int:userId>', views.SingleManagersView.as_view()),
+    path('groups/manager/users', views.GroupsViewSet.as_view( {'get': 'list', 'post': 'create'})),
+    path('groups/manager/users/<int:userId>', views.SingleGroupsView.as_view()),
+    path('groups/delivery-crew/users', views.GroupsViewSet.as_view( {'get': 'list', 'post': 'create'})),
+    path('groups/delivery-crew/users/<int:userId>', views.SingleGroupsView.as_view()),
 ]
