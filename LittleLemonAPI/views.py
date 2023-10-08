@@ -8,8 +8,8 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import get_object_or_404
 
 
-from .models import Category, MenuItem
-from .serializers import CategorySerializer, MenuItemSerializer
+from .models import Category, MenuItem, Cart
+from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer
 
 from rest_framework import viewsets
 
@@ -147,3 +147,15 @@ class SingleGroupsView(generics.DestroyAPIView):
             managers.user_set.remove(user)
             return Response({"message": f"User removed from {group} group"})
         return Response({"message": "error"}, status=status.HTTP_400_BAD_REQUEST)
+    
+class CartView(generics.ListCreateAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+
+    def get_queryset(self):
+        return Cart.objects.filter(user=self.request.user)
+
+
+    def delete(self, request, *args, **kwargs):
+        Cart.objects.all().filter(user=self.request.user).delete()
+        return Response({'message': 'Cart emptied'})
