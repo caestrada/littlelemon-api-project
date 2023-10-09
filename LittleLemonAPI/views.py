@@ -8,8 +8,8 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import get_object_or_404
 
 
-from .models import Category, MenuItem, Cart
-from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer
+from .models import Category, MenuItem, Cart, Order, OrderItem
+from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer
 
 from rest_framework import viewsets
 
@@ -65,12 +65,67 @@ class SingleMenuItemView(generics.RetrieveUpdateDestroyAPIView):
 
 
 
-class OrderList(APIView):
-    def get(self, request):
-        return Response('List of orders', status=status.HTTP_200_OK)
+class OrderList(viewsets.ViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def list(self, request):
+        if self.request.user.is_superuser or request.user.groups.filter(name='Manager').exists():
+            orders = Order.objects.all()
+            serializer = OrderSerializer(orders, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif self.request.user.groups.filter(name="Delivery crew").exists():
+            orders = Order.objects.all().filter(delivery_crew=self.request.user) 
+            serializer = OrderSerializer(orders, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        # Customer's orders
+        orders =  Order.objects.all().filter(user=self.request.user)
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        return Response('Order created', status=status.HTTP_201_CREATED)
+    def create(self, request):
+        menuitem_count = Cart.objects.all().filter(user=self.request.user).count()
+        if menuitem_count == 0:
+            return Response({"message:": "Cart is empty"})
+        
+        data = request.data.copy()
+        total = self.__get_total_price(self.request.user)
+        data["total"] = total
+        data["user"] = self.request.user.id
+        from datetime import datetime
+        current_date = datetime.now().date()
+        data["date"] = current_date.strftime('%Y-%m-%d')
+        order_serializer = OrderSerializer(data=data)
+        if order_serializer.is_valid():
+            order = order_serializer.save()
+            items = Cart.objects.all().filter(user=self.request.user).all()
+
+            for item in items.values():
+                orderitem = OrderItem(
+                    order=order,
+                    menuitem_id=item["menuitem_id"],
+                    price=item["price"],
+                    quantity=item["quantity"],
+                    unit_price=item["unit_price"]
+                )
+                orderitem.save()
+
+            Cart.objects.all().filter(user=self.request.user).delete()
+
+            result = order_serializer.data.copy()
+            result["total"] = total
+            return Response(order_serializer.data)
+        else:
+            # If the serializer is not valid, return errors
+            return Response(order_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def __get_total_price(self, user):
+        total = 0
+        items = Cart.objects.all().filter(user=user).all()
+        for item in items.values():
+            total += item["price"]
+        return total
 
 
 
