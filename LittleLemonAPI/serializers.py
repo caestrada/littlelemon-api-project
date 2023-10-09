@@ -43,4 +43,4 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ["id", "user", "delivery_crew", "status", "total", "date"]
-        extra_kwargs = {"delivery_crew": {"read_only": True}, "status": {"read_only": True}}
+        extra_kwargs = {"delivery_crew": {"read_only": False}, "status": {"read_only": False}}

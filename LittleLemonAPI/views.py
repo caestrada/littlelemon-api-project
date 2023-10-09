@@ -129,15 +129,29 @@ class OrderList(viewsets.ViewSet):
 
 
 
-class OrderDetail(APIView):
-    def get(self, request, pk):
-        return Response('Order detail with id ' + str(pk), status=status.HTTP_200_OK)
+class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
 
-    def put(self, request, pk):
-        return Response('Order updated', status=status.HTTP_200_OK)
+    def update(self, request, *args, **kwargs):
+        # Manager or superuser
+        if (self.request.user.is_superuser or request.user.groups.filter(name='Manager').exists()):
+            return super().update(request, *args, **kwargs)
 
-    def delete(self, request, pk):
-        return Response('Order deleted', status=status.HTTP_204_NO_CONTENT)
+        # Delivery crew (PATCH)
+        partial = kwargs.get('partial', False)
+        if partial and 'status' in request.data and self.request.user.groups.filter(name="Delivery crew").exists():
+            return super().update(request, *args, **kwargs)
+        
+        # Customer
+        return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
+        
+    def destroy(self, request, *args, **kwargs):
+        if (self.request.user.is_superuser or request.user.groups.filter(name='Manager').exists()):
+            return super().destroy(request, *args, **kwargs)
+        
+        return Response({"message": "You are not authorized."}, status=status.HTTP_403_FORBIDDEN)
 
 
 
